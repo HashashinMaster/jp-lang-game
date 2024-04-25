@@ -18,28 +18,24 @@ export const playAudio = (path, callback) => {
   audio.play();
 };
 
-export const generateGameLevel = ({ nbStages, gameLevel }) => {
+export const generateGameLevel = ({ gameLevel }) => {
   const currentGameLevel = gameLevel === 1 ? kanas : lvl2Kanas;
-  console.log(gameLevel === 1 ? kanas : lvl2Kanas, gameLevel);
   const level = [];
-  const goodKanas = [];
 
-  for (let i = 0; i < nbStages; i++) {
+  currentGameLevel.forEach((gameLevel) => {
     const stage = [];
-    const nbOptions = 3 + i;
-    for (let j = 0; j < nbOptions; j++) {
-      let kana = null;
-      while (!kana || stage.includes(kana) || goodKanas.includes(kana)) {
-        kana =
-          currentGameLevel[Math.floor(Math.random() * currentGameLevel.length)];
-      }
-      stage.push(kana);
-    }
-    const goodKana = stage[Math.floor(Math.random() * stage.length)];
-    goodKana.correct = true;
-    goodKanas.push(goodKana);
+
+    const nbOptions = 3;
+    stage.push({ ...gameLevel, correct: true });
+    for (let i = 0; i < nbOptions; i++)
+      stage.push(
+        currentGameLevel.find(
+          (gmLevel) => gmLevel !== gameLevel && !stage.includes(gmLevel)
+        )
+      );
     level.push(stage);
-  }
+  });
+
   return level;
 };
 
@@ -56,14 +52,12 @@ export const useGameStore = create(
     gameState: gameStates.MENU,
     wrongAnswers: 0,
     changeLevel: ({ gameLevel }) => {
-      console.log(gameLevel);
       set({
         gameLevel,
       });
     },
     startGame: ({ mode }) => {
       const level = generateGameLevel({
-        nbStages: 1,
         gameLevel: get().gameLevel,
       });
       const currentKana = level[0].find((kana) => kana.correct);
